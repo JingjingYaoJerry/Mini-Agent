@@ -61,6 +61,7 @@ class AgentDashboard:
 
     def _add_event(self, kind, body):
         self.events.append((kind, body))
+        # Keep the panel short instead of letting old events fill the screen.
         self.events = self.events[-self.max_events:]
 
     @staticmethod
@@ -112,10 +113,12 @@ class DashboardContext:
         )
 
     def __enter__(self):
+        # Start Rich's live display when the with-block begins.
         self.live.start(refresh=True)
         return self.dashboard
 
     def __exit__(self, exc_type, exc, tb):
+        # Draw the latest state one last time, even if the turn raised an error.
         self.live.update(self.dashboard.render(), refresh=True)
         self.live.stop()
         return False

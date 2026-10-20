@@ -6,6 +6,7 @@ from agent import create_agent_state, run_agent
 
 
 def main():
+    # Keep one conversation state so the agent can remember earlier turns.
     agent_state = create_agent_state()
 
     while True:
@@ -23,6 +24,7 @@ def main():
         if not user_input.strip():
             continue
 
+        # agent.py handles the model/tool loop and gives back the final reply.
         response = run_agent(agent_state, user_input)
         print(f"\nLLM: {response.output_text}\n")
 

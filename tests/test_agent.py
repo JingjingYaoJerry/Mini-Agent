@@ -10,6 +10,7 @@ from rich.console import Console
 import observability
 
 
+# `agent.py` reads these values from config.py when it is imported.
 # Avoid loading .env, constructing an API client, or reading real credentials.
 offline_config = ModuleType("config")
 offline_config.MODEL = "offline-test-model"
@@ -22,6 +23,7 @@ with patch.dict(sys.modules, {"config": offline_config}):
 
 
 def model_response(text="", tool_calls=()):
+    # A small stand-in for the parts of a Responses API reply used by the loop.
     return SimpleNamespace(
         output=list(tool_calls) or [SimpleNamespace(type="message")],
         output_text=text,
@@ -29,6 +31,7 @@ def model_response(text="", tool_calls=()):
 
 
 def tool_call(name="read_file", arguments='{"path": "sample.txt"}', call_id="call-1"):
+    # The agent routes calls by name and uses call_id to attach each result.
     return SimpleNamespace(
         type="function_call",
         name=name,
@@ -39,6 +42,7 @@ def tool_call(name="read_file", arguments='{"path": "sample.txt"}', call_id="cal
 
 class AgentTests(unittest.TestCase):
     def setUp(self):
+        # Keep dashboard output in memory so tests do not need a real terminal.
         self.terminal = StringIO()
         self.create_response = Mock()
         self.read_file = Mock(return_value="sample content")
@@ -70,6 +74,7 @@ class AgentTests(unittest.TestCase):
 
         self.assertIs(agent.run_agent(state, "Say hello"), response)
 
+        # A normal answer should finish without calling any tools.
         self.assertEqual(state["step"], 1)
         self.assertEqual(state["responses"], [response])
         self.assertEqual(
@@ -103,6 +108,7 @@ class AgentTests(unittest.TestCase):
 
         self.assertIs(agent.run_agent(state, "Read sample.txt"), final)
 
+        # The fake file result should appear in the model's next input.
         tool_output = {
             "type": "function_call_output",
             "call_id": "call-1",
@@ -126,6 +132,7 @@ class AgentTests(unittest.TestCase):
         with patch.object(agent, "MAX_AGENT_STEPS", 2):
             self.assertIs(agent.run_agent(state, "Read again"), pending)
 
+        # The final requested tool is left alone once the request limit is hit.
         self.assertEqual(self.create_response.call_count, 2)
         self.read_file.assert_called_once_with(path="sample.txt")
         self.assertEqual(state["step"], 2)
@@ -146,6 +153,7 @@ class AgentTests(unittest.TestCase):
         with self.assertRaises(RuntimeError) as caught:
             agent.run_agent(state, "Trigger a model error")
 
+        # The dashboard shows the error, and the original exception still escapes.
         self.assertIs(caught.exception, error)
         self.assertEqual(state["responses"], [])
         self.assertEqual(state["step"], 0)
@@ -164,6 +172,7 @@ class AgentTests(unittest.TestCase):
 
         self.assertIs(agent.run_agent(state, "Read sample.txt"), final)
 
+        # Tool errors become text results, so the model gets a chance to respond.
         self.assertIn(
             {
                 "type": "function_call_output",
@@ -197,6 +206,7 @@ class AgentTests(unittest.TestCase):
         agent.run_agent(state, "First question")
         agent.run_agent(state, "Second question")
 
+        # Messages carry over to the next turn, but the step count starts over.
         self.assertEqual(state["step"], 1)
         self.assertEqual(state["responses"], [first, second])
         self.assertEqual(
@@ -216,6 +226,7 @@ class AgentTests(unittest.TestCase):
             with redirect_stdout(output):
                 main.main()
 
+        # The CLI skips blank input, handles a message, then exits on "q".
         self.create_response.assert_called_once()
         self.assertIn("LLM: Offline answer", output.getvalue())
         self.assertIn("Exiting the conversation...", output.getvalue())
