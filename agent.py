@@ -68,10 +68,11 @@ def run_agent(agent_state, user_input):
     dashboard.start(user_input)
 
     try:
-        with DashboardContext(dashboard) as dashboard:
+        dashboard_context = DashboardContext(dashboard)
+        with dashboard_context:
             response = _request_model(agent_state)
             dashboard.add_llm(response, agent_state["step"])
-            dashboard.update()
+            dashboard_context.update()
 
             # ---------------------------------------------------------
             # Agent loop of tool callings (if any)
@@ -86,14 +87,14 @@ def run_agent(agent_state, user_input):
                 # No function call → final answer
                 if not function_calls:
                     dashboard.finish(response)
-                    dashboard.update()
+                    dashboard_context.update()
                     return response
 
                 if agent_state["step"] >= MAX_AGENT_STEPS:
                     dashboard.finish(
                         status=f"Stopped at max steps ({MAX_AGENT_STEPS})"
                     )
-                    dashboard.update()
+                    dashboard_context.update()
                     return response
 
                 for tool_call in function_calls:
@@ -113,12 +114,12 @@ def run_agent(agent_state, user_input):
                             "output": str(result),
                         }
                     )  # append the tool outputs to the conversation context as it's one single item (round)
-                    dashboard.update()
+                    dashboard_context.update()
 
                 # Give the tool results back to the model
                 response = _request_model(agent_state)
                 dashboard.add_llm(response, agent_state["step"])
-                dashboard.update()
+                dashboard_context.update()
 
     except Exception as exc:
         dashboard.error(exc)
