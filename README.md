@@ -33,8 +33,8 @@ before running a shell command.
 
 Only shell commands have a confirmation prompt. File reads and writes do not,
 and file paths are not restricted to the project folder. A confirmed command
-still runs on my computer; the prompt is not a sandbox. For that reason, use a
-test folder and do not keep sensitive files there.
+still runs on the host computer; the prompt is not a sandbox. Use a test folder
+and keep sensitive files elsewhere.
 
 ## Try the project
 
@@ -72,6 +72,6 @@ uv run python -m unittest discover -s tests -v
 ```
 
 The tests use a fake model response, so they do not call OpenRouter or run real
-file or shell commands. They help me check the conversation loop, tool results,
-and error handling, but they do not tell me whether a real model will work.
-I have not verified this project with a live model request.
+file or shell commands. They check the conversation loop, tool results, and
+error handling, but do not show whether a real model will work. The project has
+not been verified with a live model request.
