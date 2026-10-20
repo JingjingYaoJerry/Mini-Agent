@@ -1,15 +1,14 @@
 # Mini-Agent
 
-This is a small project I made to learn how an AI agent can use tools. It runs
-in a terminal and can ask a language model to list files, read or write a file,
-or run a command. This is a learning project, not a finished or production-ready
-agent.
+Mini-Agent is a small terminal program that demonstrates how an AI agent can
+use tools. It can ask a language model to list files, read or write a file, or
+run a command. It is an educational prototype, not a production-ready agent.
 
 ## How it works
 
-I split the main parts into a few Python files:
+The program is split into a few Python files:
 
-- `main.py` asks me for a message and prints the final answer.
+- `main.py` asks for a message and prints the final answer.
 - `agent.py` sends the conversation to the model and handles tool requests.
 - `schemas.py` describes the tools the model is allowed to request.
 - `tools.py` contains the Python functions that do the actual work.
@@ -19,7 +18,7 @@ I split the main parts into a few Python files:
 The basic loop is:
 
 ```text
-My message -> model reply -> maybe run a tool -> send the result back -> answer
+User message -> model reply -> optional tool call -> tool result -> final answer
 ```
 
 The conversation is kept in memory while the program is running. It is not
