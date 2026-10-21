@@ -13,7 +13,7 @@ A minimal terminal coding agent. The model can list, read, and write files, and 
 * Agent runtime split across `main.py`, `agent.py`, `config.py`, `schemas.py`, and `tools.py` (CLI, loop, settings, tool schemas, tool implementations).
 * Four computer-facing tools — `list_files`, `read_file`, `write_file`, `run_command` — registered through a simple `tool_registry`.
 * OpenRouter-backed OpenAI client (`config.py`) using the Responses API and multi-step tool calling, with a max-step guard.
-* Live run dashboard in `observability.py` (Rich) that summarizes LLM steps and tool events instead of dumping raw SDK objects.
+* Live run dashboard in `observability.py` (Rich) that summarizes LLM steps and tool events instead of dumping raw text outputs.
 * Optional local variant in `local.py` (Pydantic AI + Ollama) for offline experiments.
 
 ---
