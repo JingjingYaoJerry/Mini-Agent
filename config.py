@@ -24,7 +24,14 @@ Ask before making any change; do not make any change without the user's permissi
 Make sure the user's intent is fully understood before taking any action.
 """
 
+_api_key = os.getenv("OPENROUTER_API_KEY")
+if not _api_key:
+    raise SystemExit(
+        "Missing OPENROUTER_API_KEY. "
+        "Copy .env.example to .env and set your OpenRouter API key."
+    )
+
 client = OpenAI(
     base_url="https://openrouter.ai/api/v1",
-    api_key=os.getenv("OPENROUTER_API_KEY"),
+    api_key=_api_key,
 )
